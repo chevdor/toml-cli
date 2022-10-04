@@ -118,7 +118,7 @@ fn print_toml_fragment(doc: &Document, tpath: &[TpathSegment]) {
 				next.clear();
 				match item {
 					Item::Table(t) => {
-						next.append(t);
+						next.push(t);
 					}
 					_ => panic!("malformed TOML parse-tree"),
 				}
@@ -251,7 +251,7 @@ impl Serialize for JsonValue<'_> {
 			v.serialize(serializer)
 		} else if let Some(v) = self.0.as_str() {
 			v.serialize(serializer)
-		} else if self.0.as_date_time().is_some() {
+		} else if self.0.as_datetime().is_some() {
 			"UNIMPLEMENTED: DateTime".serialize(serializer) // TODO
 		} else if let Some(arr) = self.0.as_array() {
 			let mut seq = serializer.serialize_seq(Some(arr.len()))?;
