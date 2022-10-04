@@ -1,21 +1,34 @@
-use std::env;
-use std::ffi::OsString;
-use std::path::PathBuf;
-use std::process;
-use std::str;
+#[cfg(test)]
+mod cli_tests {
 
-#[test]
-fn help_if_no_args() {
-	// Probably want to factor out much of this when adding more tests.
-	let proc = process::Command::new(get_exec_path()).output().unwrap();
-	assert!(!proc.status.success());
-	let stderr = str::from_utf8(proc.stderr.as_slice()).unwrap();
-	assert!(stderr.contains("-h, --help"));
-}
+	#[cfg(test)]
+	mod help {
+		use assert_cmd::Command;
 
-fn get_exec_path() -> PathBuf {
-	// TODO is there no cleaner way to get this from Cargo?
-	// Also should it really be "debug"?
-	let target_dir: PathBuf = env::var_os("CARGO_TARGET_DIR").unwrap_or_else(|| OsString::from("target")).into();
-	target_dir.join("debug").join("toml")
+		#[test]
+		fn it_shows_help() {
+			let mut cmd = Command::cargo_bin(env!("CARGO_BIN_EXE_toml")).unwrap();
+			let assert = cmd.arg("--help").assert();
+			assert.success().code(0);
+		}
+	}
+
+	#[cfg(test)]
+	mod get {
+		use assert_cmd::Command;
+
+		#[test]
+		fn it_gets_simple() {
+			let mut cmd = Command::cargo_bin(env!("CARGO_BIN_EXE_toml")).unwrap();
+			let assert = cmd.args(&["get", "Cargo.toml", "version"]).assert();
+			assert.success().code(0);
+		}
+
+		#[test]
+		fn it_gets_dotted() {
+			let mut cmd = Command::cargo_bin(env!("CARGO_BIN_EXE_toml")).unwrap();
+			let assert = cmd.args(&["get", "test/demo.toml", "version"]).assert();
+			assert.success().code(0);
+		}
+	}
 }
